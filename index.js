@@ -1,8 +1,12 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+const morgan = require('morgan')
 
 app.use(bodyParser.json())
+
+morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
+app.use(morgan(':method :url :body :status :res[content-length] - :response-time ms'))
 
 let persons = [
   {
@@ -28,14 +32,10 @@ let persons = [
 ]
 
 app.get('/api/persons', (req, res) => {
-  console.log("> GET: /api/persons")
-
   res.json(persons)
 })
 
 app.get('/api/persons/:id', (req, res) => {
-  console.log("> GET: /api/persons/" + req.params.id)
-
   const id = Number(req.params.id)
   const person = persons.find(p => p.id === id)
 
@@ -47,15 +47,12 @@ app.get('/api/persons/:id', (req, res) => {
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-  console.log("> DELETE: /api/persons/" + req.params.id)
-
   const id = Number(req.params.id)
   persons = persons.filter(p => p.id !== id)
 
   res.status(204).end()
 })
 
-// TODO: Should collisions be handled??
 const generateId = () => {
   let id
   while (true) {
@@ -66,10 +63,6 @@ const generateId = () => {
 }
 
 app.post('/api/persons', (req, res) => {
-  console.log("> POST: /api/persons")
-  console.log("  > Content-Type:", req.headers['content-type'])
-  console.log("  > Body:", req.body)
-
   const body = req.body
 
   if (body.name === undefined) {
@@ -94,8 +87,6 @@ app.post('/api/persons', (req, res) => {
 })
 
 app.get('/info', (req, res) => {
-  console.log("> GET: /info")
-
   responseHtml = "<p>puhelinluettelossa " + persons.length + " henkilön tiedot</p>" +
                  "<p>" + new Date() + "</p>"
 
