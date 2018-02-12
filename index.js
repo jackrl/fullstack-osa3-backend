@@ -19,7 +19,7 @@ app.get('/api/persons', (req, res) => {
     })
     .catch(error => {
       console.log(error)
-      res.status(500)
+      res.status(500).end()
     })
 })
 
@@ -27,18 +27,27 @@ app.get('/api/persons/:id', (req, res) => {
   Person
     .findById(req.params.id)
     .then(person => {
-      res.json(Person.format(person))
+      if (person) {
+        res.json(Person.format(person))
+      } else {
+        res.status(404).end()
+      }
     })
     .catch(error => {
-      res.status(404).end()
+      console.log(error)
+      res.status(400).json({ error: 'malformatted if' })
     })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  persons = persons.filter(p => p.id !== id)
-
-  res.status(204).end()
+  Person
+    .findByIdAndRemove(req.params.id)
+    .then(result => {
+      res.status(204).end()
+    })
+    .catch(error => {
+      res.status(400).send({ error: 'malformatted id' })
+    })
 })
 
 app.post('/api/persons', (req, res) => {
@@ -50,12 +59,6 @@ app.post('/api/persons', (req, res) => {
   if (body.number === undefined){
     return res.status(400).json({error: 'number missing'})
   }
-  // Handled in later exercise
-  /*
-  if (persons.find(p => p.name === body.name)) {
-    return res.status(400).json({error: 'name must be unique'})
-  }
-  */
 
   const person = new Person ({
     name: body.name,
@@ -69,15 +72,37 @@ app.post('/api/persons', (req, res) => {
     })
     .catch(error => {
       console.log(error)
-      res.status(500)
+      res.status(500).end()
+    })
+})
+
+app.put('/api/persons/:id', (req, res) => {
+  const body = req.body
+
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person
+    .findByIdAndUpdate(req.params.id, person, { new: true } )
+    .then(updatedPerson => {
+      res.json(Person.format(updatedPerson))
+    })
+    .catch(error => {
+      console.log(error)
+      res.status(400).send({ error: 'malformatted id' })
     })
 })
 
 app.get('/info', (req, res) => {
-  responseHtml = "<p>puhelinluettelossa " + persons.length + " henkilön tiedot</p>" +
+  Person
+    .count({}, (error, count) => {
+      responseHtml = "<p>puhelinluettelossa " + count + " henkilön tiedot</p>" +
                  "<p>" + new Date() + "</p>"
 
-  res.send(responseHtml)
+      res.send(responseHtml)
+    })
 })
 
 const PORT = process.env.PORT || 3001
