@@ -60,20 +60,31 @@ app.post('/api/persons', (req, res) => {
     return res.status(400).json({error: 'number missing'})
   }
 
-  const person = new Person ({
-    name: body.name,
-    number: body.number
+  Person
+  .find({name: body.name})
+  .then(result => {
+    if (result.length === 0) {
+      const person = new Person ({
+        name: body.name,
+        number: body.number
+      })
+    
+      person
+        .save()
+        .then(Person.format)
+        .then(person => {
+          res.json(person)
+        })
+        .catch(error => {
+          console.log(error)
+          res.status(500).end()
+        })
+    } else {
+      res.status(409).json({error: 'name already exists'})
+    }
   })
 
-  person
-    .save()
-    .then(savedPerson => {
-      res.json(Person.format(savedPerson))
-    })
-    .catch(error => {
-      console.log(error)
-      res.status(500).end()
-    })
+  
 })
 
 app.put('/api/persons/:id', (req, res) => {
@@ -86,8 +97,9 @@ app.put('/api/persons/:id', (req, res) => {
 
   Person
     .findByIdAndUpdate(req.params.id, person, { new: true } )
-    .then(updatedPerson => {
-      res.json(Person.format(updatedPerson))
+    .then(Person.format)
+    .then(person => {
+      res.json(person)
     })
     .catch(error => {
       console.log(error)
