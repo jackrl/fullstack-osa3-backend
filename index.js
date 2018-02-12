@@ -54,37 +54,36 @@ app.post('/api/persons', (req, res) => {
   const body = req.body
 
   if (body.name === undefined) {
-    return res.status(400).json({error: 'name missing'})
+    return res.status(400).json({ error: 'name missing' })
   }
   if (body.number === undefined){
-    return res.status(400).json({error: 'number missing'})
+    return res.status(400).json({ error: 'number missing' })
   }
 
   Person
-  .find({name: body.name})
-  .then(result => {
-    if (result.length === 0) {
-      const person = new Person ({
-        name: body.name,
-        number: body.number
-      })
-    
-      person
-        .save()
-        .then(Person.format)
-        .then(person => {
-          res.json(person)
+    .find({ name: body.name })
+    .then(result => {
+      if (result.length === 0) {
+        const person = new Person ({
+          name: body.name,
+          number: body.number
         })
-        .catch(error => {
-          console.log(error)
-          res.status(500).end()
-        })
-    } else {
-      res.status(409).json({error: 'name already exists'})
-    }
-  })
 
-  
+        person
+          .save()
+          .then(Person.format)
+          .then(person => {
+            res.json(person)
+          })
+          .catch(error => {
+            console.log(error)
+            res.status(500).end()
+          })
+      } else {
+        res.status(409).json({ error: 'name already exists' })
+      }
+    })
+
 })
 
 app.put('/api/persons/:id', (req, res) => {
@@ -110,8 +109,8 @@ app.put('/api/persons/:id', (req, res) => {
 app.get('/info', (req, res) => {
   Person
     .count({}, (error, count) => {
-      responseHtml = "<p>puhelinluettelossa " + count + " henkilön tiedot</p>" +
-                 "<p>" + new Date() + "</p>"
+      const responseHtml = '<p>puhelinluettelossa ' + count + ' henkilön tiedot</p>' +
+                 '<p>' + new Date() + '</p>'
 
       res.send(responseHtml)
     })

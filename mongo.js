@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const url = "not for you github ;)"
+const url = 'not for you github ;)'
 
 mongoose.connect(url)
 
@@ -21,14 +21,14 @@ if (name) {
   person
     .save()
     .then(response => {
-      console.log("lisätään henkilö", name, "numero", number, "luetteloon")
+      console.log('lisätään henkilö', name, 'numero', number, 'luetteloon')
       mongoose.connection.close()
     })
 } else {
   Person
     .find({})
     .then(result => {
-      console.log("puhelinluettelo:")
+      console.log('puhelinluettelo:')
       result.forEach(p => {
         console.log(p.name, p.number)
       })
